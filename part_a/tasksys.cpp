@@ -181,8 +181,11 @@ const char* TaskSystemParallelThreadPoolSleeping::name() {
 
 TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int num_threads)
         : ITaskSystem(num_threads), num_threads_(num_threads), killed(false) {
+    // 初始化状态对象
     state_ = std::make_unique<TasksState>();
+    // 初始化线程池
     threads_pool_ = std::make_unique<std::thread[]>(num_threads);
+    // 初始化条件变量和互斥锁
     hasTasks = std::make_unique<std::condition_variable>();
     hasTasksMutex = std::make_unique<std::mutex>();
     for (int i = 0; i < num_threads; i++) {
@@ -191,8 +194,10 @@ TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int n
 }
 
 TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
+    // 通知所有线程退出
     killed = true;
     hasTasks->notify_all();
+    // 等待所有线程结束
     for (int i = 0; i < num_threads_; i++) {
         threads_pool_[i].join();
     }
